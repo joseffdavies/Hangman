@@ -41,7 +41,7 @@ rst	code	0    ; reset vector
 	goto	setup
 
 pdata	code    ; a section of programme memory for storing data
-	; ******* myTable, data in programme memory, and its length *****
+	; ******* myTable and myTable2 data in programme memory, and its length *****
 myTable data	    "____\n"	; message, plus carriage return
 	constant    myTable_l=.5	; length of data
 myTable2 data	    "Press RB5\n"	; message, plus carriage return
@@ -58,18 +58,19 @@ setup	bcf	EECON1, CFGS	; point to Flash program memory
 	
 	; ******* Main programme ****************************************
 start 	
-	;movlw	0x00
+	;movlw	0x00 ;alt scoring method
 	;movwf	score
+	
 	movlw	0x00
-	movwf	winLED
+	movwf	winLED ; initialise so that there are no winners
 	movlw	"&"
-	movwf	fakeletter
+	movwf	fakeletter ; use & so that same letter isn't found twice
 	movlw	.4
-	movwf	word_len
+	movwf	word_len ; length of words in database of words
 	movlw	.0
-	movwf	total_score
+	movwf	total_score ; total score of all players
 	movlw	.1
-	movwf	player
+	movwf	player ; current player that's turn it is - player 1
 	movlw	.0
 	movwf	score1
 	movwf	score2
