@@ -24,7 +24,7 @@ winLED	    res	1
 
 player	    res 1   ; current player number
 letterPos   res 1   ; position in whole word currently at
-chosenletter res 1 ;keypad letter
+chosenletter res 1  ; keypad letter
 letter	    res 1   ; current letter in whole word being compared against
 word_len    res	1   ; length of the words in the database
 high_score  res 1   ; stores highest score any player has 
@@ -37,18 +37,16 @@ wordsList   res 0x80    ; reserve 128 bytes for list of words
 tables2	    udata 0x500    ; reserve data anywhere in RAM (here at 0x500)
 myArray2    res 0x80    ; reserve 128 bytes for hangman display data
 
-;chosenWord  res 0x80	; stores chosen word
 
 rst	code	0    ; reset vector
 	goto	setup
 
 pdata	code    ; a section of programme memory for storing data
-	; ******* myTable, data in programme memory, and its length *****
+	; ******* myTable and myTable2, data in programme memory, and its length *****
 myTable data	    "____\n"	; message, plus carriage return
 	constant    myTable_l=.5	; length of data
 myTable2 data	    "Press RB5\n"	; message, plus carriage return
 	constant    myTable2_l=.10	; length of data	
-
 	
 main	code
 	; ******* Programme FLASH read Setup Code ***********************
