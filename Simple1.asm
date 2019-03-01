@@ -1,30 +1,28 @@
 	#include p18f87k22.inc
 
-	extern  LCD_Setup, LCD_Write_Message, LCD_clear, LCD_nextline, LCD_delay_ms	    ; external LCD subroutines
+	extern  LCD_Setup, LCD_Write_Message, LCD_clear, LCD_delay_ms	    ; external LCD subroutines
 	extern	pad_setup, pad_read
-	extern  LCD_Setup, LCD_Write_Message	    ; external LCD subroutines
 	extern	LCD_Write_Hex			    ; external LCD subroutines
-	extern	random				    ; external wordsDatabase 
-	extern	column, fit
-	global	wordsList, counter
-	global	counter2
+	extern	random, fit			    ; external wordsDatabase subroutine 
+	extern	column				; external keyPad location
+	global	wordsList, counter, counter2
 	
 acs0	udata_acs   ; reserve data space in access ram
 counter	    res 1   ; reserve one byte for a counter variable
 counter2    res 1   ; gives random number to select word from database of words
 delay_count res 1   ; reserve one byte for counter in the delay routine
-;score	    res 4   ; scores of each of the four players
-fakeletter  res 1
-score1	    res	1
-score2	    res	1
+;score	    res 4   ; scores of each of the four players (alternative code for the scoring that didn't work)
+fakeletter  res 1   ; variable for fake letter to replace letter on keypad
+score1	    res	1   ; score of player 1
+score2	    res	1   ; score of player 2
 score3	    res	1
 score4	    res	1
-winLED	    res	1
+winLED	    res	1   ; binary number to be written to portF to light LEDs of the winners
 
 
 player	    res 1   ; current player number
 letterPos   res 1   ; position in whole word currently at
-chosenletter res 1  ; keypad letter
+chosenletter res 1 ;keypad letter
 letter	    res 1   ; current letter in whole word being compared against
 word_len    res	1   ; length of the words in the database
 high_score  res 1   ; stores highest score any player has 
@@ -37,16 +35,18 @@ wordsList   res 0x80    ; reserve 128 bytes for list of words
 tables2	    udata 0x500    ; reserve data anywhere in RAM (here at 0x500)
 myArray2    res 0x80    ; reserve 128 bytes for hangman display data
 
+;chosenWord  res 0x80	; stores chosen word
 
 rst	code	0    ; reset vector
 	goto	setup
 
 pdata	code    ; a section of programme memory for storing data
-	; ******* myTable and myTable2, data in programme memory, and its length *****
+	; ******* myTable, data in programme memory, and its length *****
 myTable data	    "____\n"	; message, plus carriage return
 	constant    myTable_l=.5	; length of data
 myTable2 data	    "Press RB5\n"	; message, plus carriage return
 	constant    myTable2_l=.10	; length of data	
+
 	
 main	code
 	; ******* Programme FLASH read Setup Code ***********************
