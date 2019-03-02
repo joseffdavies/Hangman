@@ -256,34 +256,40 @@ increment ;  goes to winner LED lighting if all letters have been found
 	goto	endofgame
 	; --
 notfound ; if selected letter isn't in word
-	movlw	.0
-	;movwf	INDF1
-	addwf	POSTINC0 ; adds 0 to current score
+	
+	;movlw	.0 (alt method of scoring)
+	;addwf	POSTINC0 ; adds 0 to current score
+	; --resets player to 1 if player is 4
 	movlw	.4
 	CPFSLT	player ; skips if f < 4
 	goto	reset_to_player1
+	;--
+	;--increments player by 1
 	movlw	.1
 	addwf	player
+	;--
 	goto	lightLED
 	;loop to LED lighting part ;seema
-reset_to_player1
-	;lfsr	FSR0, score
+reset_to_player1 ;sets player to 1
+	;lfsr	FSR0, score (alt scoring method)
 	movlw	.1
 	movwf	player
 	goto	lightLED
+	
 endofgame
-	movlw	0x00
+	movlw	0x00 ; turn off all player LEDs
 	movwf	PORTF
-	movlw	.4
-	movwf	counter
-	movlw	.1
+	movlw	.1 ;makes high_score 1
 	movwf	high_score
+	
+	;movlw	.4  (alt scoring method)
+	;movwf	counter
 	;lfsr	FSR2, score
 highscore_loop	
-	;movff	POSTINC2, current_score ;this doesn't work
+	;movff	POSTINC2, current_score ;(alt scoring method (would loop around))
 	;movf	high_score, w
 	
-	;gets the high score:
+	;gets the high score and putis in high_score:
 	movf	score1, w
 	CPFSGT	high_score
 	movff	score1, high_score
@@ -296,16 +302,14 @@ highscore_loop
 	movf	score4, w
 	CPFSGT	high_score
 	movff	score4, high_score
+	;--
 	
-	;lights LED if score is high score:
-	
+	;sets bit in winLED to 1 corresponding to player's LED if players score is high score:
 	movf	score1, w
 	CPFSEQ	high_score
 	goto	check_win2
 	movlw	0x02
 	XORWF	winLED, 1
-	
-	;bsf	PORTF, 1
 check_win2
 	movf	score2, w
 	CPFSEQ	high_score
@@ -324,10 +328,11 @@ check_win4
 	goto	lightwin
 	movlw	0x10
 	XORWF	winLED, 1
-lightwin
+	;--
+	
+lightwin ;lights winner LEDs by moving winLED to PORTF
 	movff	winLED, PORTF
 	nop
-	
 	goto	start
 	
 	
