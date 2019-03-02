@@ -71,14 +71,15 @@ start
 	movwf	total_score ; total score of all players
 	movlw	.1
 	movwf	player ; current player that's turn it is - player 1
+	; --Set all scores to 0 initially
 	movlw	.0
 	movwf	score1
 	movwf	score2
 	movwf	score3
 	movwf	score4
-	 
+	;-- 
 		
-	; write my table to myArray
+	;-- write my table to myArray
 	lfsr	FSR0, myArray	; Load FSR0 with address in RAM	
 	movlw	upper(myTable)	; address of data in PM
 	movwf	TBLPTRU		; load upper bits to TBLPTRU
@@ -92,9 +93,9 @@ loop 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
 	decfsz	counter		; count down to zero
 	bra	loop		; keep going until finished
-	;----------
+	;--
 	
-		; write my table2 to myArray2
+	; -- write my table2 to myArray2
 	lfsr	FSR0, myArray2	; Load FSR0 with address in RAM	
 	movlw	upper(myTable2)	; address of data in PM
 	movwf	TBLPTRU		; load upper bits to TBLPTRU
@@ -108,38 +109,37 @@ loop2 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
 	decfsz	counter		; count down to zero
 	bra	loop2		; keep going until finished
-	;----------
-	;writes myArray to LCD
+	;--
+	;--writes myArray2 to LCD
 	call	LCD_clear
 	movlw	myTable2_l-1	; output message to LCD (leave out "\n")
 	lfsr	FSR2, myArray2
 	call	LCD_Write_Message
 	;--------------
-		
-	;call	LCD_nextline
-	call	pad_setup
-	call	fit
-	call	random
+	call	pad_setup ;sets up pad
+	call	fit ; writes words to wordsList 
+	call	random ; waits until RB5 is pressed then stores random word number in counter2
+	; -- multiplies counter2 by word_len and writes to counter2
 	movf	word_len, w
 	mulwf	counter2
 	movff	PRODL,	counter2
+	;--
 	nop
 	nop
-	call	LCD_Setup
+	call	LCD_Setup ;RB5 interferes with LCD display (as on the same port) so need to setup again
 	nop
-	;call	LCD_clear
-	movlw	.1000
+	movlw	.1000 ; delay due to RB5 interference
 	call	LCD_delay_ms
 	nop
+	;-- write myArray to LCD (underscores)
 	movlw	myTable_l-1	; output message to LCD (leave out "\n")
 	lfsr	FSR2, myArray
 	call	LCD_Write_Message
+	;--
 	nop
-	;lfsr	FSR0, score
-	nop
-lightLED ;seema
+lightLED 
 	movlw	0x00
-	movwf	TRISF, ACCESS ;port G all outputs
+	movwf	TRISF, ACCESS ; port F all outputs
 checkLED1 
 	movlw	.1
 	CPFSEQ 	player   ;check player, skips next line if player 1
