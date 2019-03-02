@@ -1,7 +1,6 @@
 #include p18f87k22.inc
 	
     global	random, fit
-    extern	LCD_Write_Message
     extern	wordsList
     extern	counter2, counter	
 
@@ -19,7 +18,8 @@ words	data	"FAMENOPEBEANFILEDEALCAKEMALE"
 
 cwords	code
 
-fit	lfsr	FSR0, wordsList	; Load FSR0 with address in RAM	
+fit	;-- writes words to wordList
+	lfsr	FSR0, wordsList	; Load FSR0 with address in RAM	
 	movlw	upper(words)	; address of data in PM
 	movwf	TBLPTRU		; load upper bits to TBLPTRU
 	movlw	high(words)	; address of data in PM
@@ -33,23 +33,25 @@ loop2 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	decfsz	counter		; count down to zero
 	bra	loop2		; keep going until finished
 	return
+	;--
 random
-	bsf TRISB,TRISB5
-	movf PORTB, W
+	bsf TRISB,TRISB5 ;sets RB5 as TRIS
+	movf PORTB, W 
 	nop
 	bcf INTCON,RBIF ; clear RBIF 
-	movlw	.6
+	movlw	.6 ; intialises counter2 to number of words minus 1
 	movwf	counter2
 randomloop
-	btfsc	INTCON, RBIF
+	btfsc	INTCON, RBIF ; if RB5 pressed then runs next line, if not skips
 	return
 	DECFSZ	counter2, 1 ;decreases counter by 1 and skips next instruction if zero
 	goto randomloop	
 	
-setcounter ;sets counter to 2
+setcounter ;sets counter2 to 6
 	movlw	.6
 	movwf	counter2
  	goto	randomloop
+	
 	
 	end	
 	
