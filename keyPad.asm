@@ -9,8 +9,8 @@ row	res 1 ;location to store row
    
 pad	code
 
-table
-	banksel 0x200
+table ; puts letters in bank 2 in the locations which correspond to the hex value produced by button press
+	banksel 0x200 ;bank 2
 	movlw	"A"
 	movwf	0x11, BANKED
 	
@@ -60,34 +60,32 @@ table
 	movwf	0x88, BANKED
 	return
 	
-	;keep inputting letters and their addresses into table??
-	
-pad_setup
-	banksel .15 ;found this 15 using the data sheet, to find which 'file register' it is in?
+pad_setup 
+	banksel .15
 	bsf	PADCFG1,REPU,BANKED
 	clrf	LATE
 	call	table
 	return
 
 pad_read
+	;-- intilaises column and row
 	movlw	0x00
 	movwf	column
+	movwf	row
+	;--
 	
-	;FB73
+	;--finds which column has been pressed
 	movlw	0x0F ;sets columns as inputs (0-3)
 	movwf	TRISE, ACCESS
 	nop
 	nop
-	;movlw   .1 ;delay
-	;call	lcdlp2 ;delay
-	movlw	0xFF
+	movlw	0xFF ;turns all pins on 
 	movwf	PORTE
-
 	movlw   .1 ;delay
 	call	lcdlp2 ;delay
-	
-	movff	PORTE, column
-	
+	movff	PORTE, column ;reads from keypad and moves to column
+	;--
+	;checks is column is 0xF0 i.e. no button press has been read, if this is the case make column 0x00 (so that will loop around pad again) otherwise read row
 	movlw	0xF0
 	CPFSEQ	column
 	goto	readrow
@@ -95,7 +93,7 @@ pad_read
 	movwf	column
 	return
 	
-	;CDEF
+	;equivalent for row:
 readrow	
 	movlw	0xF0 ;sets rows as inputs
 	movwf	TRISE, ACCESS
@@ -108,29 +106,19 @@ readrow
 	movlw   .1
 	call	lcdlp2
 	movff	PORTE, row 
-	
 	movlw	0x0F
 	CPFSEQ	row
 	goto	andcolrow
 	movlw	0x00
 	movwf	column
 	return
-	;movf	column, w
-	;andwf	row,w
-	;movwf	FSR2L
-	;movlw	.2
-	;movwf	FSR2H
-andcolrow	
+andcolrow ; column AND row and puts in column -> column now corresponds to the bank 2 locations	
 	movf	row, w
 	ANDWF	column, 1, 0 ;puts in column location
 	nop
 	movf	column, w
 	lfsr	FSR1, 0x200
 	movf	PLUSW1, w
-	
-	
-	;have changed every port H to port E
-	
 	return
 
     end
