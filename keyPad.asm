@@ -1,7 +1,7 @@
 
 #include p18f87k22.inc
 	global	pad_read, pad_setup, column
-	extern	lcdlp2, LCD_Write_Message
+	extern	lcdlp2
 
 acs0    udata_acs   ; named variables in access ram
 column  res 1 ;location to store column 
@@ -127,8 +127,6 @@ andcolrow
 	movf	column, w
 	lfsr	FSR1, 0x200
 	movf	PLUSW1, w
-	
-	;call	LCD_Write_Message
 	
 	
 	;have changed every port H to port E
