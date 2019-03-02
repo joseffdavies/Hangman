@@ -137,14 +137,14 @@ loop2 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	call	LCD_Write_Message
 	;--
 	nop
-lightLED 
+lightLED ;-- uses player to determine which player's turn it is, lights their LED
 	movlw	0x00
 	movwf	TRISF, ACCESS ; port F all outputs
 checkLED1 
 	movlw	.1
-	CPFSEQ 	player   ;check player, skips next line if player 1
+	CPFSEQ 	player   ;check if player is 1, skips next line if is
 	goto	checkLED2
-	bsf	PORTF, 1
+	bsf	PORTF, 1 ; turns on LED 1
 	goto	loop_pread
 
 checkLED2	
@@ -164,69 +164,72 @@ checkLED3
 checkLED4	
 	bsf	PORTF, 4
 	
-loop_pread ;loops until button on keypad is pressed goes to find_letter when button is pressed	
+loop_pread ; loops until button on keypad is pressed goes to find_letter when button is pressed	
 	call	pad_read
-	TSTFSZ	column  ;skips next line if no key pressed on keypad
-	goto	find_letter ; letter is in FSR1
-	goto	loop_pread  ; goto current line in code
-
-
-	; a delay subroutine if you need one, times around loop in delay_count
-delay	decfsz	delay_count	; decrement until zero
+	TSTFSZ	column  ; skips next line if no key pressed on keypad (or if column or row are not read)
+	goto	find_letter ; letter is in w
+	goto	loop_pread
+	
+delay	;-- a delay subroutine
+	decfsz	delay_count	; decrement until zero
 	bra delay
 	return
 
-find_letter ; length of word is 2 for now -> need to make this a constant but isn't working
-	movwf	chosenletter
-	movlw	.0
-	movwf	letterPos
+find_letter
+	movwf	chosenletter ; letter entered on key pad stored in chosenletter
+	movlw	.0 ; initialises letterPos which tracks through the random word chosen
+	movwf	letterPos 
 find_letter_loop	
 	movlw	.1
-	addwf	letterPos ;adds one to letterPos (initially 0)
+	addwf	letterPos ; adds one to letterPos (initially 0)
 	movf	word_len, w
 	addlw	.1
-	CPFSLT	letterPos ;if letter position is less than 3 skips next line
+	CPFSLT	letterPos ;if letter position is less than word_len + 1 skips next line
 	goto	notfound
-	lfsr	FSR0, wordsList ;moves address of wordsList to FSR0
+	lfsr	FSR0, wordsList ; moves address of wordsList to FSR0
 	
-	;add counter2 to letterPos and put in w
+	; add counter2 to letterPos and puts in w (position in wordsList of current letter to be checked)
 	movlw	.1
 	subwf	letterPos, 0
 	addwf	counter2, 0
-	;addwf	letterPos-1, 0
 	;--
 	
- 	movff	PLUSW0, letter ;gets the letter at position w in wordsList and puts in letter
+ 	movff	PLUSW0, letter ; gets the letter at position w in wordsList and puts in letter
 	movf	chosenletter, w
-	CPFSEQ	letter  ;compares chosen letter with letter in word, skips if it is in word
-	goto	find_letter_loop
+	CPFSEQ	letter  ; compares chosen letter with letter in word, skips if it is in word
+	goto	find_letter_loop ; loops until all letters have been checked
 	goto	found
 	
 
-found ; code if letter is in word ;joe
-	; goto code to add letter to display
-	;need to add letter to myArray at position letterPos
-	call	LCD_clear
-	lfsr	FSR2, myArray
+found ; if letter is found in the word, clears LCD, adds letter to replace underscore, adds 1 to current players score and total_score
+	call	LCD_clear ;clears LCD
+	
+	lfsr	FSR2, myArray 
 	movlw	.1
-	subwf	letterPos, 0
-	movff	letter, PLUSW2
+	subwf	letterPos, 0 ;subtract 1 from letterPos and put result in w
+	movff	letter, PLUSW2 ; moves letter entered (found in word) to that position in myArray (to replace and underscore)
+	;-- writes new myArray to LCD (with an underscore replaced with an entered letter)
 	movlw	myTable_l-1
 	call	LCD_Write_Message
 	;--
-	;change stored letter
+	;--changes stored letter to fakeletter (so that players can't get points for already displayed letters)
 	movf	column, w
 	lfsr	FSR1, 0x200
 	movff	fakeletter, PLUSW1
 	;--
+	
+	;addwf	POSTINC0, 1 ; adds 1 to current score (alt method)
+	;-- add 1 to total score
 	movlw	.1
-	;addwf	POSTINC0, 1 ; adds 1 to current score
 	addwf	total_score, 1
+	;--
+	
+	;adds 1 to score of current player
 check_score1	
 	movlw	0x01
-	CPFSEQ	player
+	CPFSEQ	player ; if player is 1 then skips next line
 	goto	check_score2
-	addwf	score1
+	addwf	score1 ;adds 1 to score1
 	goto	increment	
 check_score2
 	movlw	0x02
@@ -245,20 +248,14 @@ check_score3
 check_score4
 	movlw	.1
 	addwf	score4
-	
-increment
-	movlw	.4
-	CPFSLT	player ; skips if f < 4
-	call	reset_to_player1
+	;--
+increment ;  goes to winner LED lighting if all letters have been found
 	movf	total_score, w
-	CPFSEQ	word_len
+	CPFSEQ	word_len ;checks if all letters have been found
 	goto	lightLED
 	goto	endofgame
-	;check if all letters in word have been found
-notfound 
-	;code if letter isn't in word ;joe
-	;code to sound buzzer 
-	;---
+	; --
+notfound ; if selected letter isn't in word
 	movlw	.0
 	;movwf	INDF1
 	addwf	POSTINC0 ; adds 0 to current score
