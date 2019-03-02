@@ -150,7 +150,7 @@ lcdlp1	decf 	LCD_cnt_l,F	; no carry when 0x00 -> 0xff
 	subwfb 	LCD_cnt_h,F	; no carry when 0x00 -> 0xff
 	bc 	lcdlp1		; carry, then loop again
 	return			; carry reset so return
-LCD_clear
+LCD_clear ;clears LCD display
 	movlw	b'00000001'	; display clear
 	call	LCD_Send_Byte_I
 	movlw	.2
