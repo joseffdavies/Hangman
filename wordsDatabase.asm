@@ -39,7 +39,7 @@ random
 	movf PORTB, W 
 	nop
 	bcf INTCON,RBIF ; clear RBIF 
-	movlw	.6 ; intialises counter2 to number of words minus 1
+	movlw	.7 ; intialises counter2 to number of words minus 1
 	movwf	counter2
 randomloop
 	btfsc	INTCON, RBIF ; if RB5 pressed then runs next line, if not skips
@@ -47,8 +47,8 @@ randomloop
 	DECFSZ	counter2, 1 ;decreases counter by 1 and skips next instruction if zero
 	goto randomloop	
 	
-setcounter ;sets counter2 to 6
-	movlw	.6
+setcounter ;sets counter2 to 7
+	movlw	.7
 	movwf	counter2
  	goto	randomloop
 	
