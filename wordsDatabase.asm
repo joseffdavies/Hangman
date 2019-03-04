@@ -45,13 +45,17 @@ randomloop
 	btfsc	INTCON, RBIF ; if RB5 pressed then runs next line, if not skips
 	return
 	DECFSZ	counter2, 1 ;decreases counter by 1 and skips next instruction if zero
-	goto randomloop	
+	goto randomdelay
+
 	
 setcounter ;sets counter2 to 6
 	movlw	.6
 	movwf	counter2
  	goto	randomloop
 	
+randomdelay ;delay to ensure all numbers are that number for the amount of time 6 is
+	nop
+	goto randomloop
 	
 	end	
 	
