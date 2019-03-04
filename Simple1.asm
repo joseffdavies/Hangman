@@ -119,7 +119,9 @@ loop2 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	call	pad_setup ;sets up pad
 	call	fit ; writes words to wordsList 
 	call	random ; waits until RB5 is pressed then stores random word number in counter2
-	; -- multiplies counter2 by word_len and writes to counter2
+	; -- subtracts one from counter2, multiplies counter2 by word_len and writes to counter2
+	movlw	.1
+	subwf	counter2, 1
 	movf	word_len, w
 	mulwf	counter2
 	movff	PRODL,	counter2
