@@ -3,14 +3,6 @@
     global	random, fit
     extern	wordsList
     extern	counter2, counter	
-
-;int_hi	code	0x0008 ; high vector, no low vector ;joe
-;    btfss   INTCON,RBIE ; check that this is RBIF interrupt
-;    retfie  FAST ; if not then return
-;    ;incf    LATD ; increment PORTD
-;    ;add code here to add one to counter and double it
-;    bcf	    INTCON,RBIF ; clear interrupt flag
-;    retfie  FAST ; fast return from interrupt
    
 wdata	code
 words	data	"FAMENOPEBEANFILEDEALCAKEMALE"
